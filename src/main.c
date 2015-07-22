@@ -9,11 +9,13 @@ Add info in middle, date/weather/battery
 	
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
-
+	
 	
 static Window *window;
 static Layer *s_background_layer, *s_display_layer;
-static TextLayer *s_time_layer, *s_weather_layer;
+static TextLayer *s_time_layer;
+static BitmapLayer *s_weather_layer;
+static GBitmap *s_weather_bitmap;
 
 static void time_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
@@ -23,13 +25,13 @@ static void time_update_proc(Layer *layer, GContext *ctx) {
   struct tm *t = localtime(&now);
 	
 	
-	graphics_context_set_fill_color(ctx, GColorBlack);
+	graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 	
 	
 	//SECOND 
 	//circle
-	graphics_context_set_stroke_color(ctx, GColorWhite);
+	graphics_context_set_stroke_color(ctx, GColorBlack);
 	graphics_draw_circle(ctx, center, 70);
 	//graphics_fill_circle(ctx, center, 70);
   
@@ -72,12 +74,12 @@ static void time_update_proc(Layer *layer, GContext *ctx) {
     .x = (int16_t)(sin_lookup(hour_angle) * (int32_t)47 / TRIG_MAX_RATIO) + center.x,
     .y = (int16_t)(-cos_lookup(hour_angle) * (int32_t)47 / TRIG_MAX_RATIO) + center.y,
   };
-  graphics_context_set_stroke_color(ctx, GColorWhite);
+  graphics_context_set_stroke_color(ctx, GColorBlack);
   graphics_draw_line(ctx, hour_hand, center);
 	
 	
 	//Center Details
-	graphics_context_set_fill_color(ctx, GColorWhite);
+	graphics_context_set_fill_color(ctx, GColorBlack);
 	graphics_fill_circle(ctx, center, 40);
 	
   // Create a long-lived buffer
@@ -85,6 +87,15 @@ static void time_update_proc(Layer *layer, GContext *ctx) {
   strftime(buffer, sizeof("00-00"), "%d/%m", t);
 
 	text_layer_set_text(s_time_layer, buffer);
+	
+	
+	if(t->tm_min % 15 == 0){
+		DictionaryIterator *iterator;
+		app_message_outbox_begin(&iterator);
+		dict_write_int8(iterator, 0, 0);
+		
+		app_message_outbox_send();
+	}
 }
 	
 static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
@@ -104,30 +115,74 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, s_display_layer);
 		
 	s_time_layer = text_layer_create(GRect(57, 71, 35, 15));
+	text_layer_set_background_color(s_time_layer, GColorBlack);
+	text_layer_set_text_color(s_time_layer, GColorWhite);
 	//text_layer_set_font(s_time_layer, FONT_KEY_LECO_20_BOLD_NUMBERS);
 	//text_layer_set_size(s_time_layer, 16);
 	layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
-	
-	s_weather_layer = text_layer_create(GRect(47, 86, 50, 30));
-	text_layer_set_background_color(s_weather_layer, GColorOrange);
-	text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
-	text_layer_set_text(s_weather_layer, "Loading");
-	layer_add_child(window_layer, text_layer_get_layer(s_weather_layer));
+		
+	s_weather_layer = bitmap_layer_create(GRect(47, 86, 50, 30));
+	layer_add_child(window_layer, bitmap_layer_get_layer(s_weather_layer));
 }
 
 static void window_unload(Window *window) {
   layer_destroy(s_background_layer);
   layer_destroy(s_display_layer);
 	text_layer_destroy(s_time_layer);
-	text_layer_destroy(s_weather_layer);
+  bitmap_layer_destroy(s_weather_layer);
+	gbitmap_destroy(s_weather_bitmap);
+}
+
+static uint32_t getWeatherResource(char conditions[]){
+	
+	
+	if(! strcmp(conditions, "01d")){
+		return RESOURCE_ID_WEATHER_1_DAY;
+	}else if(! strcmp(conditions,"01n")){
+	  return RESOURCE_ID_WEATHER_1_NIGHT;
+	}else if(! strcmp(conditions,"02d")){
+	  return RESOURCE_ID_WEATHER_2_DAY;
+	}else if(! strcmp(conditions,"02n")){
+	  return RESOURCE_ID_WEATHER_2_NIGHT;
+	}else if(! strcmp(conditions,"03d")){
+	  return RESOURCE_ID_WEATHER_3_DAY;
+	}else if(! strcmp(conditions,"03n")){
+	  return RESOURCE_ID_WEATHER_3_DAY;
+	}else if(! strcmp(conditions,"04d")){
+	  return RESOURCE_ID_WEATHER_4_DAY;
+	}else if(! strcmp(conditions,"04n")){
+	  return RESOURCE_ID_WEATHER_4_NIGHT;
+	}else if(! strcmp(conditions,"09d")){
+	  return RESOURCE_ID_WEATHER_9_DAY;
+	}else if(! strcmp(conditions,"09n")){
+	  return RESOURCE_ID_WEATHER_9_NIGHT;
+	}else if(! strcmp(conditions,"10d")){
+	  return RESOURCE_ID_WEATHER_10_DAY;
+	}else if(! strcmp(conditions,"10n")){
+	  return RESOURCE_ID_WEATHER_10_NIGHT;
+	}else if(! strcmp(conditions,"11d")){
+	  return RESOURCE_ID_WEATHER_11_DAY;
+	}else if(! strcmp(conditions,"11n")){
+	  return RESOURCE_ID_WEATHER_11_NIGHT;
+	}else if(! strcmp(conditions,"13d")){
+	  return RESOURCE_ID_WEATHER_13_DAY;
+	}else if(! strcmp(conditions,"13n")){
+	  return RESOURCE_ID_WEATHER_13_NIGHT;
+	}	else if(! strcmp(conditions,"50d")){
+	  return RESOURCE_ID_WEATHER_50_DAY;
+	} else if(! strcmp(conditions,"50n")){
+	  return RESOURCE_ID_WEATHER_50_NIGHT;
+	}else {
+		APP_LOG(APP_LOG_LEVEL_ERROR, "Unknown weather resource id");
+		return RESOURCE_ID_WEATHER_50_DAY;
+	}
+		
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *ctx){
 	// Store incoming info
   static char temperature_buffer[8];
   static char conditions_buffer[32];
-  static char weather_layer_buffer[32];
-
 	
 	// Read first item
 	Tuple *t = dict_read_first(iterator);
@@ -149,9 +204,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *ctx){
 		t = dict_read_next(iterator);
 	}
 	
-	snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
-  text_layer_set_text(s_weather_layer, weather_layer_buffer);
+  s_weather_bitmap = gbitmap_create_with_resource(getWeatherResource(conditions_buffer));
+	bitmap_layer_set_bitmap(s_weather_layer,s_weather_bitmap);
 }
+
+
 
 static void inbox_dropped_callback(AppMessageResult reason, void *ctx){
 	APP_LOG(APP_LOG_LEVEL_ERROR, "Message Dropped");

@@ -33,12 +33,12 @@ function locationSuccess(pos){
 		//Get Data 
 		
 		var json = JSON.parse(responseText);
-		console.log(JSON.stringify(json))
+		console.log(JSON.stringify(json));
 		//change temp from Kelvin
 		var temperature = Math.round(json.main.temp - 273.15);
 		console.log('Temperature is ' + temperature);
 		//conditions
-		var conditions = json.weather[0].main;
+		var conditions = json.weather[0].icon;
 		console.log('Conditions are ' + conditions);
 		
 		

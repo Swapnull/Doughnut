@@ -12,6 +12,96 @@
     "resources": {
         "media": [
             {
+                "file": "images/50n.png",
+                "name": "WEATHER_50_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/50d.png",
+                "name": "WEATHER_50_DAY",
+                "type": "png"
+            },
+            {
+                "file": "images/13n.png",
+                "name": "WEATHER_13_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/13d.png",
+                "name": "WEATHER_13_DAY",
+                "type": "png"
+            },
+            {
+                "file": "images/11n.png",
+                "name": "WEATHER_11_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/11d.png",
+                "name": "WEATHER_11_DAY",
+                "type": "png"
+            },
+            {
+                "file": "images/10n.png",
+                "name": "WEATHER_10_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/09n.png",
+                "name": "WEATHER_9_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/09d.png",
+                "name": "WEATHER_9_DAY",
+                "type": "png"
+            },
+            {
+                "file": "images/04n.png",
+                "name": "WEATHER_4_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/04d.png",
+                "name": "WEATHER_4_DAY",
+                "type": "png"
+            },
+            {
+                "file": "images/03n.png",
+                "name": "WEATHER_3_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/03d.png",
+                "name": "WEATHER_3_DAY",
+                "type": "png"
+            },
+            {
+                "file": "images/02n.png",
+                "name": "WEATHER_2_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/02d.png",
+                "name": "WEATHER_2_DAY",
+                "type": "png"
+            },
+            {
+                "file": "images/01n.png",
+                "name": "WEATHER_1_NIGHT",
+                "type": "png"
+            },
+            {
+                "file": "images/01d.png",
+                "name": "WEATHER_1_DAY",
+                "type": "png"
+            },
+            {
+                "file": "images/10d.png",
+                "name": "WEATHER_10_DAY",
+                "type": "png"
+            },
+            {
                 "file": "images/doughnut-9_55.png",
                 "menuIcon": true,
                 "name": "DOUGHNUT_955",
