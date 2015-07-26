@@ -1,10 +1,3 @@
-/* 
-IDEAS 
------
-
-Add time - Maybe around second ring? Could be done with a graphic.
-Add info in middle, date/weather/battery
-*/
 #include "pebble.h"
 	
 #define KEY_TEMPERATURE 0
@@ -85,11 +78,11 @@ static void time_update_proc(Layer *layer, GContext *ctx) {
   // Create a long-lived buffer
   static char buffer[] = "00-00";
   strftime(buffer, sizeof("00-00"), "%d/%m", t);
-
 	text_layer_set_text(s_time_layer, buffer);
 	
 	
-	if(t->tm_min % 15 == 0){
+	if(t->tm_min % 15 == 0 && t->tm_sec == 1){
+		APP_LOG(APP_LOG_LEVEL_INFO, "time is %i:%i", t->tm_hour ,t->tm_min);
 		DictionaryIterator *iterator;
 		app_message_outbox_begin(&iterator);
 		dict_write_int8(iterator, 0, 0);
@@ -114,14 +107,14 @@ static void window_load(Window *window) {
   layer_set_update_proc(s_display_layer, time_update_proc);
   layer_add_child(window_layer, s_display_layer);
 		
-	s_time_layer = text_layer_create(GRect(57, 71, 35, 15));
+	s_time_layer = text_layer_create(GRect(57, 60, 35, 20));
 	text_layer_set_background_color(s_time_layer, GColorBlack);
 	text_layer_set_text_color(s_time_layer, GColorWhite);
-	//text_layer_set_font(s_time_layer, FONT_KEY_LECO_20_BOLD_NUMBERS);
-	//text_layer_set_size(s_time_layer, 16);
+	text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
 	layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
 		
-	s_weather_layer = bitmap_layer_create(GRect(47, 86, 50, 30));
+		
+	s_weather_layer = bitmap_layer_create(GRect(47, 80, 50, 35));
 	layer_add_child(window_layer, bitmap_layer_get_layer(s_weather_layer));
 }
 
@@ -204,7 +197,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *ctx){
 		t = dict_read_next(iterator);
 	}
 	
-  s_weather_bitmap = gbitmap_create_with_resource(getWeatherResource(conditions_buffer));
+	s_weather_bitmap = gbitmap_create_with_resource(getWeatherResource(conditions_buffer));
 	bitmap_layer_set_bitmap(s_weather_layer,s_weather_bitmap);
 }
 
